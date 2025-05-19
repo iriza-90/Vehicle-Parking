@@ -1,0 +1,29 @@
+{
+  "development": {
+    "username": "postgres",
+    "password": "ihms@J1976",
+    "database": "vehicle",
+    "host": "127.0.0.1",
+    "dialect": "postgres",
+    "port": "5434",
+    "logging": false
+  },
+  "test": {
+    "username": "postgres",
+    "password": "ihms@J1976",
+    "database": "vehicle",
+    "host": "127.0.0.1",
+    "dialect": "postgres",
+    "port": "5434"
+  },
+  "production": {
+    "username": "postgres",
+    "password": "ihms@J1976",
+    "database": "vehicle",
+    "host": "127.0.0.1",
+    "dialect": "postgres",
+    "port": "5434"
+  }
+}
+  
+
