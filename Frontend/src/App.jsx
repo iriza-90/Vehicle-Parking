@@ -11,6 +11,9 @@ import VerifyOTP from './pages/auth/VerifyOTP'
 import Dashboard from './pages/dashboard/Dashboard'
 import VehicleManagement from './pages/vehicles/VehicleManagement'
 import Layout from './components/layout/Layout'
+import TicketPage from './pages/tickets/TicketPage'
+
+
 
 function App() {
   const { isLoading } = useAuth()
@@ -38,12 +41,16 @@ function App() {
       </Route>
 
       {/* Protected routes */}
-      <Route path="/dashboard" element={<PrivateRoute />}>
-        <Route element={<Layout />}>
-          <Route index element={<Dashboard />} />
-          <Route path="vehicles" element={<VehicleManagement />} />
-        </Route>
-      </Route>
+     <Route path="/dashboard" element={<PrivateRoute />}>
+  <Route element={<Layout />}>
+    <Route index element={<Dashboard />} />
+    <Route path="vehicles" element={<VehicleManagement />} />
+  </Route>
+</Route>
+
+{/*  OUTSIDE the dashboard layout */}
+<Route path="/ticket" element={<PrivateRoute><TicketPage /></PrivateRoute>} />
+
 
       {/* Catch all route */}
       <Route path="*" element={<Navigate replace to="/" />} />

@@ -78,18 +78,26 @@ const fetchVehicles = useCallback(async () => {
   };
 
   const deleteVehicle = async (id) => {
-    try {
-      const token = localStorage.getItem('parkAuthToken');
-      await axios.delete(`/vehicles/delete/${id}`, {
+  try {
+    const token = localStorage.getItem('parkAuthToken');
+    await axios.delete(`/vehicles/delete/${id}`, {
       headers: { Authorization: `Bearer ${token}` },
-      });
-      setVehicles(prev => prev.filter(v => v.id !== id));
-      toast.success('Vehicle deleted!');
-    } catch {
-      toast.error('Failed to delete vehicle.');
-    }
-  };
+    });
 
+    setVehicles(prev => prev.filter(v => v.id !== id));
+    toast.success('Vehicle deleted!');
+  } catch (error) {
+    const errMsg = error.response?.data?.error || 'Failed to delete vehicle.';
+    
+    if (error.response?.status === 404) {
+      toast.error("You can't delete this vehicle. Not yours or not found.");
+    } else {
+      toast.error(errMsg);
+    }
+
+    console.error('Delete failed:', error.response?.data || error.message);
+  }
+};
   const checkoutVehicle = async (id) => {
   try {
     const token = localStorage.getItem('parkAuthToken');
@@ -97,15 +105,31 @@ const fetchVehicles = useCallback(async () => {
       headers: { Authorization: `Bearer ${token}` },
     });
 
-    // 👇 Update only the specific vehicle, keeping the rest intact
-    setVehicles(prev => prev.map(v => (v.id === id ? res.data.vehicle : v)));
+    const { vehicle, ticket } = res.data;
 
-    toast.success('Vehicle checked out!');
+    if (!ticket) {
+      toast.error('No ticket received from server.');
+      return null;
+    }
+    
+
+    setVehicles(prev =>
+      prev.map(v => (v.id === vehicle.id ? vehicle : v))
+    );
+
+    setLatestTicket(ticket); 
+    toast.success(`Checked out! Amount: $${ticket.amount.toFixed(2)}`);
+    return ticket;
   } catch (err) {
+    console.error(err);
     toast.error('Checkout failed.');
-    console.error('Checkout error:', err.response?.data || err.message);
+    return null;
   }
 };
+
+const [latestTicket, setLatestTicket] = useState(null);
+
+
   const filteredVehicles = vehicles.filter(v =>
     v.owner?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     v.plate?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -119,22 +143,24 @@ const fetchVehicles = useCallback(async () => {
 
   return (
     <VehicleContext.Provider
-      value={{
-        vehicles: paginatedVehicles,
-        loading,
-        searchTerm,
-        setSearchTerm,
-        currentPage,
-        setCurrentPage,
-        vehiclesPerPage,
-        totalVehicles: filteredVehicles.length,
-        addVehicle,
-        updateVehicle,
-        deleteVehicle,
-        checkoutVehicle,
-        allVehicles: vehicles, // for dashboard stats
-      }}
-    >
+  value={{
+    vehicles: paginatedVehicles,
+    loading,
+    searchTerm,
+    setSearchTerm,
+    currentPage,
+    setCurrentPage,
+    vehiclesPerPage,
+    totalVehicles: filteredVehicles.length,
+    addVehicle,
+    updateVehicle,
+    deleteVehicle,
+    checkoutVehicle,
+    allVehicles: vehicles,
+    latestTicket,           
+    setLatestTicket,        //  Optional, if you want to manually reset it from a modal or elsewhere
+  }}
+>
       {children}
     </VehicleContext.Provider>
   );

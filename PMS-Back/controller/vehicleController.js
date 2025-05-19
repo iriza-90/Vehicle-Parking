@@ -1,6 +1,7 @@
 const { Vehicle } = require('../models');
 const { Op, Sequelize } = require('sequelize');
 const { format } = require('date-fns');
+const { Ticket } = require('../models');
 
 // Get all vehicles (user-specific, with pagination)
 exports.getAll = async (req, res) => {
@@ -109,39 +110,48 @@ exports.delete = async (req, res) => {
       return res.status(404).json({ error: 'Vehicle not found or not authorized' });
     }
 
-    res.status(204).end();
+    return res.status(200).json({ message: 'Vehicle deleted successfully' });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
+
+// checkout vehicle and generate ticket
 exports.checkout = async (req, res) => {
-  try {
-    const { id } = req.params;
+  const vehicleId = req.params.id;
 
-    // Find vehicle by ID
-    const vehicle = await Vehicle.findByPk(id);
+  const vehicle = await Vehicle.findByPk(vehicleId);
+  if (!vehicle) return res.status(404).json({ error: "Vehicle not found" });
 
-    if (!vehicle) {
-      return res.status(404).json({ error: 'Vehicle not found' });
-    }
-
-    if (vehicle.status === 'checked_out') {
-      return res.status(400).json({ error: 'Vehicle already checked out' });
-    }
-
-    // Set timeOut to current time and update status
-    vehicle.timeOut = format(new Date(), 'yyyy-MM-dd HH:mm:ss'); // or new Date().toISOString()
-    vehicle.status = 'checked_out';
-
-    await vehicle.save();
-
-    res.status(200).json({ message: 'Vehicle checked out successfully', vehicle });
-  } catch (error) {
-    console.error('Checkout error:', error);
-    res.status(500).json({ error: 'An error occurred while checking out the vehicle.' });
+  if (vehicle.status === 'checked_out') {
+    return res.status(400).json({ error: 'Vehicle already checked out' });
   }
+
+  const timeOut = new Date();
+  const timeIn = new Date(vehicle.timeIn);
+  const duration = Math.ceil((timeOut - timeIn) / (1000 * 60 * 60)); // in hours
+  const ratePerHour = 2000;
+  const amount = duration * ratePerHour;
+
+  vehicle.timeOut = timeOut;
+  vehicle.status = 'checked_out';
+  await vehicle.save();
+
+  const ticket = await Ticket.create({
+    amount,
+    duration,
+    plate: vehicle.plate,
+    vehicleType: vehicle.vehicleType,
+    timeIn,
+    timeOut,
+    VehicleId: vehicle.id,
+    UserId: req.user.id
+  });
+
+  return res.status(200).json({ vehicle, ticket }); // ✅ Make sure this part exists
 };
+
 
 // Search vehicles (user-specific, flexible query)
 exports.search = async (req, res) => {

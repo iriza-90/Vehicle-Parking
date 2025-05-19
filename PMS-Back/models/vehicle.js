@@ -10,8 +10,15 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      Vehicle.belongsTo(models.User, { foreignKey: 'UserId' });
-    }
+  Vehicle.belongsTo(models.User, { foreignKey: 'UserId' });
+
+  Vehicle.hasMany(models.Ticket, {
+    foreignKey: 'VehicleId',
+    onDelete: 'CASCADE',     // ✅ Important
+    hooks: true              // ✅ Required for cascading to work with Sequelize
+  });
+
+}
   }
   Vehicle.init({
     owner: DataTypes.STRING,
