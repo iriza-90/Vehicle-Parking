@@ -12,6 +12,7 @@ import Dashboard from './pages/dashboard/Dashboard'
 import VehicleManagement from './pages/vehicles/VehicleManagement'
 import Layout from './components/layout/Layout'
 import TicketPage from './pages/tickets/TicketPage'
+import ParkingManagement from './pages/parking/parkingManagement'
 
 
 
@@ -45,6 +46,7 @@ function App() {
   <Route element={<Layout />}>
     <Route index element={<Dashboard />} />
     <Route path="vehicles" element={<VehicleManagement />} />
+    <Route path="parking" element={<ParkingManagement />} />
   </Route>
 </Route>
 

@@ -6,6 +6,7 @@ const { sequelize } = require('./models');
 
 const authRoutes = require('./routes/authRoutes');
 const vehicleRoutes = require('./routes/vehicleRoutes');
+const parkingRoutes = require('./routes/parkingRoutes')
 const swaggerJSDoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 const {  swaggerSpec } = require('./swagger');
@@ -16,7 +17,7 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: 'http://localhost:5173', 
+  origin: 'http://localhost:5174', 
   credentials: true
 }));
 app.use(bodyParser.json());
@@ -30,6 +31,7 @@ app.get('/', (req, res) => {
 // Mount routes
 app.use('/api/auth', authRoutes);
 app.use('/vehicles', vehicleRoutes);
+app.use('/api', parkingRoutes);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Start the server & sync DB

@@ -68,6 +68,21 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
               Vehicles
             </NavLink>
 
+            <NavLink
+  to="/dashboard/parking"
+  className={({ isActive }) =>
+    `flex items-center px-4 py-2 text-sm font-medium rounded-md transition-colors duration-150 ${
+      isActive
+        ? 'bg-primary-50 text-primary-700'
+        : 'text-gray-600 hover:bg-gray-100'
+    }`
+  }
+>
+  <FiSettings className="mr-3 h-5 w-5" />
+  Parking
+</NavLink>
+
+
             {/* 👤 Profile Nav Item */}
             {user && (
               <NavLink
